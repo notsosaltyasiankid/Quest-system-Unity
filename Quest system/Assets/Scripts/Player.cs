@@ -1,0 +1,22 @@
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+[RequireComponent(typeof(CharacterController))]
+public class Player : MonoBehaviour
+{
+    [SerializeField] FPController FPController;
+
+    void OnMove(InputValue value)
+    {
+        FPController.MoveInput = value.Get<Vector2>();
+    }
+    void OnLook(InputValue value)
+    {
+        FPController.MoveInput = value.Get<Vector2>();
+    }
+
+    void OnValidate()
+    {
+        if (FPController != null) { GetComponent<FPController>(); }
+    }
+}
