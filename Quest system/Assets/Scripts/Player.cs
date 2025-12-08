@@ -12,11 +12,18 @@ public class Player : MonoBehaviour
     }
     void OnLook(InputValue value)
     {
-        FPController.MoveInput = value.Get<Vector2>();
+        FPController.LookInput = value.Get<Vector2>();
     }
 
     void OnValidate()
     {
         if (FPController != null) { GetComponent<FPController>(); }
+    }
+
+    void Start()
+    {
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
+
     }
 }
