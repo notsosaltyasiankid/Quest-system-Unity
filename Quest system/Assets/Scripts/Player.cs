@@ -15,6 +15,11 @@ public class Player : MonoBehaviour
         FPController.LookInput = value.Get<Vector2>();
     }
 
+    void OnSprint(InputValue value)
+    {
+        FPController.SprintInput = value.isPressed;
+    }
+
     void OnValidate()
     {
         if (FPController != null) { GetComponent<FPController>(); }

@@ -1,13 +1,23 @@
+using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class FPController : MonoBehaviour
 {
-    public float MaxSpeed = 3.5f;
+    public float MaxSpeed => SprintInput ? SprintSpeed : WalkSpeed;
     public float Acceleration = 15f;
 
+    [SerializeField] float WalkSpeed = 3.5f;
+    [SerializeField] float SprintSpeed = 8f;
     public Vector3 CurrentVelocity {  get; private set; }
     public float CurrentSpeed {  get; private set; }
+
+    public bool sprinting {
+        get 
+        {
+            return SprintInput && CurrentSpeed > 0.1f; 
+        }
+    }
 
     public Vector2 LookSensitivy = new Vector2(0.1f, 0.1f);
     public float PitchLimit = 85f;
@@ -22,9 +32,21 @@ public class FPController : MonoBehaviour
         }
     }
 
+    [SerializeField] float CameraNormalFov = 60f;
+    [SerializeField] float CameraSprintFov = 80f;
+    [SerializeField] float CameraFovSmoothing = 1f;
+
+    float TargetCameraFov
+    {
+        get
+        {
+            return sprinting ? CameraSprintFov : CameraNormalFov;
+        }
+    }
+
     public Vector2 MoveInput;
     public Vector2 LookInput;
-
+    public bool SprintInput;
 
     [SerializeField] Camera FPCamera;
     [SerializeField] CharacterController Controller;
@@ -41,6 +63,7 @@ public class FPController : MonoBehaviour
     {
         MoveUpdate();
         LookUpdate();
+        CameraUpdate();
     }
 
     void MoveUpdate()
@@ -80,5 +103,21 @@ public class FPController : MonoBehaviour
 
         // links en rechts kijken
         transform.Rotate(Vector3.up *  input.x);
+    }
+
+    void CameraUpdate()
+    {
+        float targetFOV = CameraNormalFov;
+
+        if (sprinting)
+        {
+            float speedRatio = CurrentSpeed / SprintSpeed;
+
+            targetFOV = Mathf.Lerp(CameraNormalFov, CameraSprintFov, speedRatio);
+        }
+
+
+        FPCamera.fieldOfView = Mathf.Lerp(FPCamera.fieldOfView, targetFOV, Time.deltaTime * CameraFovSmoothing);
+
     }
 }
