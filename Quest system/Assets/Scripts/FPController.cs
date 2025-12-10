@@ -4,13 +4,14 @@ using UnityEngine;
 [RequireComponent(typeof(CharacterController))]
 public class FPController : MonoBehaviour
 {
+    //Movement parameters
     public float MaxSpeed => SprintInput ? SprintSpeed : WalkSpeed;
     public float Acceleration = 15f;
 
     [SerializeField] float WalkSpeed = 3.5f;
     [SerializeField] float SprintSpeed = 8f;
-    public Vector3 CurrentVelocity {  get; private set; }
-    public float CurrentSpeed {  get; private set; }
+
+    [SerializeField] float JumpHeight = 2f;
 
     public bool sprinting {
         get 
@@ -19,6 +20,8 @@ public class FPController : MonoBehaviour
         }
     }
 
+
+    //looking parameters
     public Vector2 LookSensitivy = new Vector2(0.1f, 0.1f);
     public float PitchLimit = 85f;
     [SerializeField] float currentPitch = 0f;
@@ -32,6 +35,8 @@ public class FPController : MonoBehaviour
         }
     }
 
+
+    //Camera parameters
     [SerializeField] float CameraNormalFov = 60f;
     [SerializeField] float CameraSprintFov = 80f;
     [SerializeField] float CameraFovSmoothing = 1f;
@@ -44,10 +49,21 @@ public class FPController : MonoBehaviour
         }
     }
 
+    //physics parameters
+    [SerializeField] float GravityScale = 3f;
+
+    public float VerticalVelocity = 0f;
+    public Vector3 CurrentVelocity { get; private set; }
+    public float CurrentSpeed { get; private set; }
+
+    public bool IsGrounded => Controller.isGrounded;
+
+    //Inputs
     public Vector2 MoveInput;
     public Vector2 LookInput;
     public bool SprintInput;
 
+    //compo
     [SerializeField] Camera FPCamera;
     [SerializeField] CharacterController Controller;
 
@@ -66,6 +82,15 @@ public class FPController : MonoBehaviour
         CameraUpdate();
     }
 
+    public void TryJump()
+    {
+        if (IsGrounded == false)
+        {
+            return;
+        }
+        VerticalVelocity = Mathf.Sqrt(JumpHeight * -2 * Physics.gravity.y * GravityScale);
+    }
+
     void MoveUpdate()
     {
         Vector3 motion = transform.forward * MoveInput.y + transform.right * MoveInput.x;
@@ -81,14 +106,24 @@ public class FPController : MonoBehaviour
             CurrentVelocity = Vector3.MoveTowards(CurrentVelocity, Vector3.zero, Acceleration * Time.deltaTime);
         }
 
-        float verticalVelocity = Physics.gravity.y * 20f * Time.deltaTime;
+        if (IsGrounded && VerticalVelocity <= 0.01f)
+        {
+            VerticalVelocity = -3f;
+        }
+        else
+        {
+            VerticalVelocity += Physics.gravity.y * GravityScale * Time.deltaTime;
+        }
 
-        Vector3 fullVelocity = new Vector3(CurrentVelocity.x, verticalVelocity, CurrentVelocity.z);
+
+
+        Vector3 fullVelocity = new Vector3(CurrentVelocity.x, VerticalVelocity, CurrentVelocity.z);
 
 
 
         Controller.Move(fullVelocity * Time.deltaTime);
 
+        // updating de speed
         CurrentSpeed = CurrentVelocity.magnitude;
     }
 

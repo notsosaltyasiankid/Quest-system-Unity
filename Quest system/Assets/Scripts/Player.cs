@@ -20,6 +20,14 @@ public class Player : MonoBehaviour
         FPController.SprintInput = value.isPressed;
     }
 
+    void OnJump(InputValue value) 
+    {
+        if (value.isPressed)
+        {
+            FPController.TryJump();
+        }
+    }
+
     void OnValidate()
     {
         if (FPController != null) { GetComponent<FPController>(); }
