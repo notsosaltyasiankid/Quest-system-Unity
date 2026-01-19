@@ -1,9 +1,11 @@
+using Unity.VisualScripting;
 using UnityEditor.Rendering.LookDev;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
 public class FPController : MonoBehaviour
 {
+
     //Movement parameters
     public float MaxSpeed => SprintInput ? SprintSpeed : WalkSpeed;
     public float Acceleration = 15f;
@@ -35,6 +37,9 @@ public class FPController : MonoBehaviour
         }
     }
 
+    //Interaction parameters
+    [SerializeField] float InteractDistance = 3f;
+    [SerializeField] LayerMask InteractLayer;
 
     //Camera parameters
     [SerializeField] float CameraNormalFov = 60f;
@@ -63,7 +68,7 @@ public class FPController : MonoBehaviour
     public Vector2 LookInput;
     public bool SprintInput;
 
-    //compo
+    
     [SerializeField] Camera FPCamera;
     [SerializeField] CharacterController Controller;
 
@@ -80,6 +85,25 @@ public class FPController : MonoBehaviour
         MoveUpdate();
         LookUpdate();
         CameraUpdate();
+    }
+
+    public void TryInteract()
+    {
+        Ray ray = new Ray(FPCamera.transform.position, FPCamera.transform.forward);
+
+        if (Physics.Raycast(ray, out RaycastHit hit, InteractDistance, InteractLayer))
+        {
+            IInteractable interactable = hit.collider.GetComponent<IInteractable>();
+            if (interactable != null)
+            {
+                interactable.Interact();
+            }
+        }
+        Color rayColor = Physics.Raycast(ray, out hit, InteractDistance, InteractLayer)
+        ? Color.red
+        : Color.green;
+
+        Debug.DrawRay(ray.origin, ray.direction * InteractDistance, rayColor, 1f);
     }
 
     public void TryJump()

@@ -28,6 +28,13 @@ public class Player : MonoBehaviour
         }
     }
 
+    void OnInteract(InputValue value)
+    {
+        if (value.isPressed)
+        {
+            FPController.TryInteract();
+        }
+    }
     void OnValidate()
     {
         if (FPController != null) { GetComponent<FPController>(); }
@@ -37,6 +44,5 @@ public class Player : MonoBehaviour
     {
         Cursor.visible = false;
         Cursor.lockState = CursorLockMode.Locked;
-
     }
 }
