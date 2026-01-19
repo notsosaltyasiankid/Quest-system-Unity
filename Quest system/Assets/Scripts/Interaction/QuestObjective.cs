@@ -15,7 +15,7 @@ public class QuestObjective
     {
         currentAmount += amount;
         currentAmount = Mathf.Clamp(currentAmount, 0, requiredAmount);
-    }
+    }   
 
     public void Activate()
     {
